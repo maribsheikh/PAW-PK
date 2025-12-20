@@ -1,0 +1,11 @@
+node_modules
+frontend/node_modules
+backend/node_modules
+dist
+.git
+.cache
+npm-debug.log
+.env
+public_html
+frontend/dist
+**/test
