@@ -24,8 +24,27 @@ const app = express();
 const PORT = process.env.BACKEND_PORT || process.env.PORT || 3001;
 
 // Middleware - CORS first, then helmet
+// Allow multiple origins for development and production
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'https://thepawinternational.com',
+  'https://www.thepawinternational.com',
+  'http://localhost:5173' // Keep for local development
+].filter(Boolean); // Remove undefined values
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      // Log for debugging
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-session-id']

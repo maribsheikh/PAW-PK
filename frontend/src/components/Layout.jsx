@@ -1,6 +1,7 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { getImageUrl } from '../utils/images';
 
 const Layout = () => {
   const { user, logout, isAdmin } = useAuth();
@@ -22,14 +23,12 @@ const Layout = () => {
             <div className="flex items-center gap-3">
               <Link to="/" className="flex items-center gap-3">
                 <img 
-                  src="http://localhost:3001/images/logo.jpeg" 
+                  src={getImageUrl('logo.jpeg')} 
                   alt="PAW INTERNATIONAL" 
                   className="h-12 w-auto"
                   style={{ display: 'block', maxWidth: '120px' }}
                   onError={(e) => {
                     console.error('Logo failed to load:', e.target.src);
-                    // Try fallback
-                    e.target.src = '/images/logo.jpeg';
                   }}
                 />
                 <div className="flex flex-col">
@@ -101,7 +100,7 @@ const Layout = () => {
             <div>
               <div className="mb-4">
                 <img 
-                  src="/images/logo.jpeg" 
+                  src={getImageUrl('logo.jpeg')} 
                   alt="PAW PK" 
                   className="h-12 w-auto"
                   onError={(e) => {

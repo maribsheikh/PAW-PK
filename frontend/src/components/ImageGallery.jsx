@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { getImageUrl } from '../utils/images';
 
 const ImageGallery = ({ images, productId, selectedColor = null }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -25,19 +26,6 @@ const ImageGallery = ({ images, productId, selectedColor = null }) => {
       }
     };
   }, [isHovered, images.length]);
-
-  const getImageUrl = (imagePath) => {
-    if (imagePath.startsWith('http')) {
-      return imagePath;
-    }
-    if (imagePath.startsWith('images/')) {
-      return `http://localhost:3001/${imagePath}`;
-    }
-    if (imagePath.startsWith('product_')) {
-      return `http://localhost:3001/uploads/${imagePath}`;
-    }
-    return `http://localhost:3001/images/${imagePath}`;
-  };
 
   const nextImage = () => {
     setCurrentIndex((prev) => (prev + 1) % images.length);
