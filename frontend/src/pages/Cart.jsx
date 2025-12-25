@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { formatPrice } from '../utils/format';
 import api from '../utils/api';
+import { getImageUrl } from '../utils/images';
 
 const Cart = () => {
   const { cart, updateCartItem, removeFromCart, clearCart } = useCart();
@@ -55,7 +56,7 @@ const Cart = () => {
                 <div className="w-24 h-24 bg-gray-100 rounded flex-shrink-0">
                   {item.image && (
                     <img
-                      src={`http://localhost:3001/uploads/${item.image}`}
+                      src={getImageUrl(item.image)}
                       alt={item.title}
                       className="w-full h-full object-cover rounded"
                     />

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { getImageUrl } from '../utils/images';
 
 const Home = () => {
   const [currentFeature, setCurrentFeature] = useState(0);
@@ -51,7 +52,7 @@ const Home = () => {
         <div className="container mx-auto px-4 text-center">
           <div className="mb-8">
             <img 
-              src="/images/logo.jpeg" 
+              src={getImageUrl('logo.jpeg')} 
               alt="PAW PK" 
               className="h-24 w-auto mx-auto mb-6"
               onError={(e) => {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import api from '../../utils/api';
 import { formatPrice } from '../../utils/format';
+import { getImageUrl as getImageUrlUtil } from '../../utils/images';
 
 const AdminProducts = () => {
   const [showForm, setShowForm] = useState(false);
@@ -95,7 +96,8 @@ const AdminProducts = () => {
   const getImageUrl = (images) => {
     if (!images || images.length === 0) return null;
     const thumbnail = images.find(img => img.size === 'thumbnail');
-    return thumbnail?.url || images[0]?.url;
+    const imagePath = thumbnail?.url || images[0]?.url;
+    return imagePath ? getImageUrlUtil(imagePath) : null;
   };
 
   return (
@@ -279,7 +281,7 @@ const AdminProducts = () => {
                       <td className="p-2">
                         {imageUrl ? (
                           <img
-                            src={`http://localhost:3001/uploads/${imageUrl}`}
+                            src={imageUrl}
                             alt={product.title}
                             className="w-16 h-16 object-cover rounded"
                           />

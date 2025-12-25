@@ -22,9 +22,9 @@ const Layout = () => {
           <div className="flex items-center justify-between py-3 border-b border-gray-100">
             <div className="flex items-center gap-3">
               <Link to="/" className="flex items-center gap-3">
-                <img 
-                  src={getImageUrl('logo.jpeg')} 
-                  alt="PAW INTERNATIONAL" 
+                <img
+                  src={getImageUrl('logo.jpeg')}
+                  alt="PAW INTERNATIONAL"
                   className="h-12 w-auto"
                   style={{ display: 'block', maxWidth: '120px' }}
                   onError={(e) => {
@@ -37,7 +37,7 @@ const Layout = () => {
                 </div>
               </Link>
             </div>
-            
+
             <div className="flex items-center gap-4">
               {user ? (
                 <>
@@ -72,7 +72,7 @@ const Layout = () => {
               </Link>
             </div>
           </div>
-          
+
           {/* Main Navigation */}
           <div className="flex items-center justify-center py-4 bg-gradient-to-r from-primary-50 via-accent-50 to-primary-50">
             <div className="flex items-center gap-8">
@@ -99,9 +99,9 @@ const Layout = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="mb-4">
-                <img 
-                  src={getImageUrl('logo.jpeg')} 
-                  alt="PAW PK" 
+                <img
+                  src={getImageUrl('logo.jpeg')}
+                  alt="PAW PK"
                   className="h-12 w-auto"
                   onError={(e) => {
                     e.target.style.display = 'none';
@@ -131,8 +131,8 @@ const Layout = () => {
             <div>
               <h4 className="font-semibold mb-4 uppercase text-sm tracking-wide">Contact</h4>
               <ul className="space-y-2 text-gray-400 text-sm">
-                <li>Email: info@pawpk.com</li>
-                <li>Phone: +92 XXX XXXXXXX</li>
+                <li>Email: thepawinternational@gmail.com</li>
+                <li>Phone: +92 322-4839983</li>
                 <li className="pt-2">
                   <a href="#" className="hover:text-primary-400 transition-colors">Privacy Policy</a>
                 </li>
