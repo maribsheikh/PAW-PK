@@ -25,26 +25,48 @@ const PORT = process.env.BACKEND_PORT || process.env.PORT || 3001;
 
 // Middleware - CORS first, then helmet
 // Allow multiple origins for development and production
+const normalizeOrigin = (value) => {
+  if (!value) return null;
+  try {
+    if (value.startsWith("http://") || value.startsWith("https://")) {
+      return new URL(value).origin;
+    }
+  } catch {
+    return value.replace(/\/$/, "");
+  }
+  return value.replace(/\/$/, "");
+};
+
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   "https://thepawinternational.com",
   "https://www.thepawinternational.com",
+  "https://api.thepawinternational.com",
   "http://localhost:5173", // Keep for local development
-].filter(Boolean); // Remove undefined values
+  "http://localhost:3000",
+].map(normalizeOrigin).filter(Boolean); // Remove undefined values
+
+const allowedOriginPatterns = [
+  /^https?:\/\/(.+\.)?thepawinternational\.com(:\d+)?$/,
+  /^http:\/\/localhost(:\d+)?$/,
+  /^http:\/\/127\.0\.0\.1(:\d+)?$/,
+];
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  return allowedOriginPatterns.some((pattern) => pattern.test(origin));
+};
 
 app.use(
   cors({
     origin: function (origin, callback) {
       // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
+      if (isAllowedOrigin(origin)) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        // Log for debugging
-        console.log("CORS blocked origin:", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
+      // Log for debugging
+      console.log("CORS blocked origin:", origin);
+      return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
