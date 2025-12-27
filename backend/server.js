@@ -29,26 +29,50 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
   'https://thepawinternational.com',
   'https://www.thepawinternational.com',
-  'http://localhost:5173' // Keep for local development
+  'http://thepawinternational.com',
+  'http://www.thepawinternational.com',
+  'https://api.thepawinternational.com',
+  'http://localhost:5173', // Keep for local development
+  'http://localhost:3000',
+  'http://localhost:3001'
 ].filter(Boolean); // Remove undefined values
+
+// Log allowed origins on startup
+console.log('CORS allowed origins:', allowedOrigins);
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // Allow requests with no origin (like mobile apps, curl, or same-origin requests)
     if (!origin) return callback(null, true);
 
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      // Log for debugging
-      console.log('CORS blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
+      // Log for debugging but still allow in development
+      console.log('CORS request from origin:', origin);
+      if (process.env.NODE_ENV === 'development') {
+        // Allow all origins in development
+        callback(null, true);
+      } else {
+        // In production, be more lenient - allow if it contains the domain
+        if (origin.includes('thepawinternational.com')) {
+          callback(null, true);
+        } else {
+          console.log('CORS blocked origin:', origin);
+          callback(new Error('Not allowed by CORS'));
+        }
+      }
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-session-id']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-session-id', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 86400 // Cache preflight for 24 hours
 }));
+
+// Handle preflight requests explicitly
+app.options('*', cors());
 
 app.use(helmet({
   contentSecurityPolicy: false,
