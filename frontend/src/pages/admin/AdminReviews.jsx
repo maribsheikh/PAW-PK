@@ -1,29 +1,29 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
-import api from '../../utils/api';
-import { formatDate } from '../../utils/format';
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "react-query";
+import api from "../../utils/api";
+import { formatDate } from "../../utils/format";
 
 const AdminReviews = () => {
-  const [statusFilter, setStatusFilter] = useState('pending');
+  const [statusFilter, setStatusFilter] = useState("pending");
   const queryClient = useQueryClient();
 
   const { data: reviews = [], isLoading } = useQuery(
-    ['adminReviews', statusFilter],
+    ["adminReviews", statusFilter],
     async () => {
-      const params = statusFilter ? `?status=${statusFilter}` : '';
+      const params = statusFilter ? `?status=${statusFilter}` : "";
       const response = await api.get(`/admin/reviews${params}`);
       return response.data;
-    }
+    },
   );
 
   const moderateMutation = useMutation(
     ({ id, status }) => api.patch(`/admin/reviews/${id}`, { status }),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries('adminReviews');
-        alert('Review status updated');
-      }
-    }
+        queryClient.invalidateQueries("adminReviews");
+        alert("Review status updated");
+      },
+    },
   );
 
   const handleModerate = (reviewId, status) => {
@@ -60,22 +60,37 @@ const AdminReviews = () => {
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h3 className="font-semibold">{review.user_name}</h3>
-                    <p className="text-sm text-gray-600">{review.product_title}</p>
-                    <p className="text-sm text-gray-600">{formatDate(review.created_at)}</p>
+                    <p className="text-sm text-gray-600">
+                      {review.product_title}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {formatDate(review.created_at)}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex">
                       {[...Array(5)].map((_, i) => (
-                        <span key={i} className={i < review.rating ? 'text-yellow-400' : 'text-gray-300'}>
+                        <span
+                          key={i}
+                          className={
+                            i < review.rating
+                              ? "text-yellow-400"
+                              : "text-gray-300"
+                          }
+                        >
                           ⭐
                         </span>
                       ))}
                     </div>
-                    <span className={`px-2 py-1 rounded text-sm ${
-                      review.status === 'approved' ? 'bg-green-100 text-green-800' :
-                      review.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded text-sm ${
+                        review.status === "approved"
+                          ? "bg-green-100 text-green-800"
+                          : review.status === "rejected"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
                       {review.status}
                     </span>
                   </div>
@@ -85,16 +100,16 @@ const AdminReviews = () => {
                 )}
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleModerate(review.id, 'approved')}
+                    onClick={() => handleModerate(review.id, "approved")}
                     className="btn-primary text-sm"
-                    disabled={review.status === 'approved'}
+                    disabled={review.status === "approved"}
                   >
                     Approve
                   </button>
                   <button
-                    onClick={() => handleModerate(review.id, 'rejected')}
+                    onClick={() => handleModerate(review.id, "rejected")}
                     className="btn-secondary text-sm"
-                    disabled={review.status === 'rejected'}
+                    disabled={review.status === "rejected"}
                   >
                     Reject
                   </button>
@@ -114,4 +129,3 @@ const AdminReviews = () => {
 };
 
 export default AdminReviews;
-

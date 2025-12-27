@@ -1,32 +1,36 @@
-import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { useQuery } from 'react-query';
-import api from '../utils/api';
-import { formatPrice } from '../utils/format';
+import { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { useQuery } from "react-query";
+import api from "../utils/api";
+import { formatPrice } from "../utils/format";
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState({
-    q: searchParams.get('q') || '',
-    category: searchParams.get('category') || '',
-    minPrice: searchParams.get('minPrice') || '',
-    maxPrice: searchParams.get('maxPrice') || '',
-    sort: searchParams.get('sort') || 'created_at'
+    q: searchParams.get("q") || "",
+    category: searchParams.get("category") || "",
+    minPrice: searchParams.get("minPrice") || "",
+    maxPrice: searchParams.get("maxPrice") || "",
+    sort: searchParams.get("sort") || "created_at",
   });
 
   // Update filters when URL params change
   useEffect(() => {
     setFilters({
-      q: searchParams.get('q') || '',
-      category: searchParams.get('category') || '',
-      minPrice: searchParams.get('minPrice') || '',
-      maxPrice: searchParams.get('maxPrice') || '',
-      sort: searchParams.get('sort') || 'created_at'
+      q: searchParams.get("q") || "",
+      category: searchParams.get("category") || "",
+      minPrice: searchParams.get("minPrice") || "",
+      maxPrice: searchParams.get("maxPrice") || "",
+      sort: searchParams.get("sort") || "created_at",
     });
   }, [searchParams]);
 
-  const { data: products = [], isLoading, error } = useQuery(
-    ['products', filters],
+  const {
+    data: products = [],
+    isLoading,
+    error,
+  } = useQuery(
+    ["products", filters],
     async () => {
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
@@ -37,24 +41,24 @@ const Products = () => {
     },
     {
       retry: 2,
-      refetchOnWindowFocus: false
-    }
+      refetchOnWindowFocus: false,
+    },
   );
 
   // Log for debugging
   useEffect(() => {
     if (error) {
-      console.error('Products API Error:', error);
+      console.error("Products API Error:", error);
     }
     if (products) {
-      console.log('Products loaded:', products.length);
+      console.log("Products loaded:", products.length);
     }
   }, [products, error]);
 
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
-    
+
     // Update URL
     const params = new URLSearchParams();
     Object.entries(newFilters).forEach(([k, v]) => {
@@ -66,16 +70,16 @@ const Products = () => {
   const getImageUrl = (images, productId) => {
     // Try to get image from product images first
     if (images && images.length > 0) {
-      const medium = images.find(img => img.size === 'medium');
-      const small = images.find(img => img.size === 'small');
+      const medium = images.find((img) => img.size === "medium");
+      const small = images.find((img) => img.size === "small");
       const img = medium || small || images[0];
       if (img?.url) {
         // If it's a processed image, use uploads path
-        if (img.url.startsWith('product_')) {
+        if (img.url.startsWith("product_")) {
           return `/uploads/${img.url}`;
         }
         // If it starts with images/, use backend endpoint
-        if (img.url.startsWith('images/')) {
+        if (img.url.startsWith("images/")) {
           return `/${img.url}`;
         }
         return img.url;
@@ -130,11 +134,12 @@ const Products = () => {
                       <span className="font-bold text-primary-600">
                         {formatPrice(product.price_pkr)}
                       </span>
-                      {product.original_price && product.original_price > product.price_pkr && (
-                        <span className="text-sm text-gray-400 line-through">
-                          {formatPrice(product.original_price)}
-                        </span>
-                      )}
+                      {product.original_price &&
+                        product.original_price > product.price_pkr && (
+                          <span className="text-sm text-gray-400 line-through">
+                            {formatPrice(product.original_price)}
+                          </span>
+                        )}
                     </div>
                   </div>
                 </Link>

@@ -1,33 +1,37 @@
-import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { useQuery } from 'react-query';
-import api from '../utils/api';
-import { formatPrice } from '../utils/format';
-import { getImageUrl as getImageUrlUtil } from '../utils/images';
+import { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { useQuery } from "react-query";
+import api from "../utils/api";
+import { formatPrice } from "../utils/format";
+import { getImageUrl as getImageUrlUtil } from "../utils/images";
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState({
-    q: searchParams.get('q') || '',
-    category: searchParams.get('category') || '',
-    minPrice: searchParams.get('minPrice') || '',
-    maxPrice: searchParams.get('maxPrice') || '',
-    sort: searchParams.get('sort') || 'created_at'
+    q: searchParams.get("q") || "",
+    category: searchParams.get("category") || "",
+    minPrice: searchParams.get("minPrice") || "",
+    maxPrice: searchParams.get("maxPrice") || "",
+    sort: searchParams.get("sort") || "created_at",
   });
 
   // Update filters when URL params change
   useEffect(() => {
     setFilters({
-      q: searchParams.get('q') || '',
-      category: searchParams.get('category') || '',
-      minPrice: searchParams.get('minPrice') || '',
-      maxPrice: searchParams.get('maxPrice') || '',
-      sort: searchParams.get('sort') || 'created_at'
+      q: searchParams.get("q") || "",
+      category: searchParams.get("category") || "",
+      minPrice: searchParams.get("minPrice") || "",
+      maxPrice: searchParams.get("maxPrice") || "",
+      sort: searchParams.get("sort") || "created_at",
     });
   }, [searchParams]);
 
-  const { data: products = [], isLoading, error } = useQuery(
-    ['products', filters],
+  const {
+    data: products = [],
+    isLoading,
+    error,
+  } = useQuery(
+    ["products", filters],
     async () => {
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
@@ -38,30 +42,30 @@ const Products = () => {
     },
     {
       retry: 2,
-      refetchOnWindowFocus: false
-    }
+      refetchOnWindowFocus: false,
+    },
   );
 
   // Log for debugging
   useEffect(() => {
     if (error) {
-      console.error('Products API Error:', error);
-      console.error('Error details:', {
+      console.error("Products API Error:", error);
+      console.error("Error details:", {
         message: error.message,
         response: error.response?.data,
         status: error.response?.status,
-        url: error.config?.url
+        url: error.config?.url,
       });
     }
     if (products) {
-      console.log('Products loaded:', products.length);
+      console.log("Products loaded:", products.length);
     }
   }, [products, error]);
 
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
-    
+
     // Update URL
     const params = new URLSearchParams();
     Object.entries(newFilters).forEach(([k, v]) => {
@@ -73,8 +77,8 @@ const Products = () => {
   const getImageUrl = (images, productId) => {
     // Try to get image from product images first
     if (images && images.length > 0) {
-      const medium = images.find(img => img.size === 'medium');
-      const small = images.find(img => img.size === 'small');
+      const medium = images.find((img) => img.size === "medium");
+      const small = images.find((img) => img.size === "small");
       const img = medium || small || images[0];
       if (img?.url) {
         return getImageUrlUtil(img.url);
@@ -97,9 +101,13 @@ const Products = () => {
           {error ? (
             <div className="text-center py-12">
               <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-2xl mx-auto">
-                <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Products</h3>
+                <h3 className="text-lg font-semibold text-red-800 mb-2">
+                  Error Loading Products
+                </h3>
                 <p className="text-red-600 mb-4">
-                  {error.response?.data?.error || error.message || 'Failed to load products'}
+                  {error.response?.data?.error ||
+                    error.message ||
+                    "Failed to load products"}
                 </p>
                 {error.response?.status === 0 && (
                   <p className="text-sm text-red-500 mb-2">
@@ -108,15 +116,22 @@ const Products = () => {
                 )}
                 {error.response?.status === 404 && (
                   <p className="text-sm text-red-500 mb-2">
-                    API endpoint not found. Please verify the backend is running.
+                    API endpoint not found. Please verify the backend is
+                    running.
                   </p>
                 )}
-                {error.code === 'ERR_NETWORK' && (
+                {error.code === "ERR_NETWORK" && (
                   <div className="text-sm text-red-500 text-left">
                     <p className="mb-2">Possible issues:</p>
                     <ul className="list-disc list-inside space-y-1">
-                      <li>Backend server is not running at api.thepawinternational.com</li>
-                      <li>CORS configuration issue - backend needs to allow your frontend domain</li>
+                      <li>
+                        Backend server is not running at
+                        api.thepawinternational.com
+                      </li>
+                      <li>
+                        CORS configuration issue - backend needs to allow your
+                        frontend domain
+                      </li>
                       <li>Network connectivity problem</li>
                     </ul>
                     <p className="mt-4">
@@ -140,7 +155,8 @@ const Products = () => {
             <div className="text-center py-12">
               <p className="text-lg text-gray-600">No products found</p>
               <p className="text-sm text-gray-500 mt-2">
-                The API returned an empty list. Check if the database has products.
+                The API returned an empty list. Check if the database has
+                products.
               </p>
             </div>
           ) : (
@@ -157,14 +173,20 @@ const Products = () => {
                       alt={product.title}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        e.target.src = 'https://via.placeholder.com/400';
+                        e.target.src = "https://via.placeholder.com/400";
                       }}
                     />
                   </div>
-                  <h3 className="font-semibold text-lg mb-2">{product.title}</h3>
+                  <h3 className="font-semibold text-lg mb-2">
+                    {product.title}
+                  </h3>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-gray-400 line-through text-lg">{formatPrice(product.price_pkr * 2)}</span>
-                    <span className="text-primary-600 font-bold text-xl">{formatPrice(product.price_pkr)}</span>
+                    <span className="text-gray-400 line-through text-lg">
+                      {formatPrice(product.price_pkr * 2)}
+                    </span>
+                    <span className="text-primary-600 font-bold text-xl">
+                      {formatPrice(product.price_pkr)}
+                    </span>
                   </div>
                   {product.averageRating > 0 && (
                     <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -183,4 +205,3 @@ const Products = () => {
 };
 
 export default Products;
-

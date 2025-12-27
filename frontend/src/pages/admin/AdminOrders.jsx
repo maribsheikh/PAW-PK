@@ -1,31 +1,33 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
-import api from '../../utils/api';
-import { formatPrice, formatDate } from '../../utils/format';
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "react-query";
+import api from "../../utils/api";
+import { formatPrice, formatDate } from "../../utils/format";
 
 const AdminOrders = () => {
   const queryClient = useQueryClient();
 
-  const { data: orders = [], isLoading } = useQuery(
-    'adminOrders',
-    async () => {
-      const response = await api.get('/admin/orders');
-      return response.data;
-    }
-  );
+  const { data: orders = [], isLoading } = useQuery("adminOrders", async () => {
+    const response = await api.get("/admin/orders");
+    return response.data;
+  });
 
   const updateStatusMutation = useMutation(
-    ({ id, status, payment_status }) => api.patch(`/admin/orders/${id}`, { status, payment_status }),
+    ({ id, status, payment_status }) =>
+      api.patch(`/admin/orders/${id}`, { status, payment_status }),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries('adminOrders');
-        alert('Order updated');
-      }
-    }
+        queryClient.invalidateQueries("adminOrders");
+        alert("Order updated");
+      },
+    },
   );
 
   const handleStatusChange = (orderId, status, paymentStatus) => {
-    updateStatusMutation.mutate({ id: orderId, status, payment_status: paymentStatus });
+    updateStatusMutation.mutate({
+      id: orderId,
+      status,
+      payment_status: paymentStatus,
+    });
   };
 
   return (
@@ -61,7 +63,9 @@ const AdminOrders = () => {
                       <td className="p-2">
                         <div>
                           <div>{order.user_name}</div>
-                          <div className="text-sm text-gray-600">{order.user_email}</div>
+                          <div className="text-sm text-gray-600">
+                            {order.user_email}
+                          </div>
                         </div>
                       </td>
                       <td className="p-2">{formatDate(order.created_at)}</td>
@@ -69,7 +73,13 @@ const AdminOrders = () => {
                       <td className="p-2">
                         <select
                           value={order.status}
-                          onChange={(e) => handleStatusChange(order.id, e.target.value, order.payment_status)}
+                          onChange={(e) =>
+                            handleStatusChange(
+                              order.id,
+                              e.target.value,
+                              order.payment_status,
+                            )
+                          }
                           className="border rounded px-2 py-1 text-sm"
                         >
                           <option value="pending">Pending</option>
@@ -82,7 +92,13 @@ const AdminOrders = () => {
                       <td className="p-2">
                         <select
                           value={order.payment_status}
-                          onChange={(e) => handleStatusChange(order.id, order.status, e.target.value)}
+                          onChange={(e) =>
+                            handleStatusChange(
+                              order.id,
+                              order.status,
+                              e.target.value,
+                            )
+                          }
                           className="border rounded px-2 py-1 text-sm"
                         >
                           <option value="pending">Pending</option>
@@ -111,4 +127,3 @@ const AdminOrders = () => {
 };
 
 export default AdminOrders;
-

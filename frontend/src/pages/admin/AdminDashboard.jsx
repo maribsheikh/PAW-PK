@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
 const AdminDashboard = () => {
   return (
@@ -16,19 +16,31 @@ const AdminDashboard = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Link to="/admin/products" className="card hover:shadow-lg transition-shadow">
+          <Link
+            to="/admin/products"
+            className="card hover:shadow-lg transition-shadow"
+          >
             <h3 className="text-xl font-semibold mb-2">Products</h3>
             <p className="text-gray-600">Manage product listings</p>
           </Link>
-          <Link to="/admin/orders" className="card hover:shadow-lg transition-shadow">
+          <Link
+            to="/admin/orders"
+            className="card hover:shadow-lg transition-shadow"
+          >
             <h3 className="text-xl font-semibold mb-2">Orders</h3>
             <p className="text-gray-600">View and manage orders</p>
           </Link>
-          <Link to="/admin/reviews" className="card hover:shadow-lg transition-shadow">
+          <Link
+            to="/admin/reviews"
+            className="card hover:shadow-lg transition-shadow"
+          >
             <h3 className="text-xl font-semibold mb-2">Reviews</h3>
             <p className="text-gray-600">Moderate customer reviews</p>
           </Link>
-          <Link to="/admin/analytics" className="card hover:shadow-lg transition-shadow">
+          <Link
+            to="/admin/analytics"
+            className="card hover:shadow-lg transition-shadow"
+          >
             <h3 className="text-xl font-semibold mb-2">Analytics</h3>
             <p className="text-gray-600">View sales and statistics</p>
           </Link>
@@ -39,4 +51,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-

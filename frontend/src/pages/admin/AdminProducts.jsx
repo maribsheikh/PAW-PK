@@ -1,81 +1,81 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
-import api from '../../utils/api';
-import { formatPrice } from '../../utils/format';
-import { getImageUrl as getImageUrlUtil } from '../../utils/images';
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "react-query";
+import api from "../../utils/api";
+import { formatPrice } from "../../utils/format";
+import { getImageUrl as getImageUrlUtil } from "../../utils/images";
 
 const AdminProducts = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [formData, setFormData] = useState({
-    title: '',
-    sku: '',
-    description: '',
-    price_pkr: '',
-    category: 'dogs',
-    stock: '',
-    is_active: true
+    title: "",
+    sku: "",
+    description: "",
+    price_pkr: "",
+    category: "dogs",
+    stock: "",
+    is_active: true,
   });
   const [images, setImages] = useState([]);
   const queryClient = useQueryClient();
 
   const { data: products = [], isLoading } = useQuery(
-    'adminProducts',
+    "adminProducts",
     async () => {
-      const response = await api.get('/admin/products');
+      const response = await api.get("/admin/products");
       return response.data;
-    }
+    },
   );
 
   const deleteMutation = useMutation(
     (id) => api.delete(`/admin/products/${id}`),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries('adminProducts');
-        alert('Product deleted');
-      }
-    }
+        queryClient.invalidateQueries("adminProducts");
+        alert("Product deleted");
+      },
+    },
   );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formDataToSend = new FormData();
-    
+
     Object.entries(formData).forEach(([key, value]) => {
       formDataToSend.append(key, value);
     });
 
     images.forEach((file) => {
-      formDataToSend.append('images', file);
+      formDataToSend.append("images", file);
     });
 
     try {
       if (editingProduct) {
         await api.put(`/admin/products/${editingProduct.id}`, formDataToSend, {
-          headers: { 'Content-Type': 'multipart/form-data' }
+          headers: { "Content-Type": "multipart/form-data" },
         });
       } else {
-        await api.post('/admin/products', formDataToSend, {
-          headers: { 'Content-Type': 'multipart/form-data' }
+        await api.post("/admin/products", formDataToSend, {
+          headers: { "Content-Type": "multipart/form-data" },
         });
       }
-      
-      queryClient.invalidateQueries('adminProducts');
+
+      queryClient.invalidateQueries("adminProducts");
       setShowForm(false);
       setEditingProduct(null);
       setFormData({
-        title: '',
-        sku: '',
-        description: '',
-        price_pkr: '',
-        category: 'dogs',
-        stock: '',
-        is_active: true
+        title: "",
+        sku: "",
+        description: "",
+        price_pkr: "",
+        category: "dogs",
+        stock: "",
+        is_active: true,
       });
       setImages([]);
-      alert(editingProduct ? 'Product updated' : 'Product created');
+      alert(editingProduct ? "Product updated" : "Product created");
     } catch (error) {
-      alert(error.response?.data?.error || 'Failed to save product');
+      alert(error.response?.data?.error || "Failed to save product");
     }
   };
 
@@ -84,18 +84,18 @@ const AdminProducts = () => {
     setFormData({
       title: product.title,
       sku: product.sku,
-      description: product.description || '',
+      description: product.description || "",
       price_pkr: product.price_pkr,
       category: product.category,
       stock: product.stock,
-      is_active: product.is_active
+      is_active: product.is_active,
     });
     setShowForm(true);
   };
 
   const getImageUrl = (images) => {
     if (!images || images.length === 0) return null;
-    const thumbnail = images.find(img => img.size === 'thumbnail');
+    const thumbnail = images.find((img) => img.size === "thumbnail");
     const imagePath = thumbnail?.url || images[0]?.url;
     return imagePath ? getImageUrlUtil(imagePath) : null;
   };
@@ -111,13 +111,13 @@ const AdminProducts = () => {
                 setShowForm(true);
                 setEditingProduct(null);
                 setFormData({
-                  title: '',
-                  sku: '',
-                  description: '',
-                  price_pkr: '',
-                  category: 'dogs',
-                  stock: '',
-                  is_active: true
+                  title: "",
+                  sku: "",
+                  description: "",
+                  price_pkr: "",
+                  category: "dogs",
+                  stock: "",
+                  is_active: true,
                 });
                 setImages([]);
               }}
@@ -133,57 +133,77 @@ const AdminProducts = () => {
         {showForm && (
           <div className="card mb-8">
             <h2 className="text-xl font-bold mb-4">
-              {editingProduct ? 'Edit Product' : 'Add New Product'}
+              {editingProduct ? "Edit Product" : "Add New Product"}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Title *</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Title *
+                  </label>
                   <input
                     type="text"
                     required
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
                     className="input-field"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">SKU *</label>
+                  <label className="block text-sm font-medium mb-2">
+                    SKU *
+                  </label>
                   <input
                     type="text"
                     required
                     value={formData.sku}
-                    onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, sku: e.target.value })
+                    }
                     className="input-field"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Description</label>
+                <label className="block text-sm font-medium mb-2">
+                  Description
+                </label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                   rows="4"
                   className="input-field"
                 />
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Price (PKR) *</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Price (PKR) *
+                  </label>
                   <input
                     type="number"
                     required
                     step="0.01"
                     value={formData.price_pkr}
-                    onChange={(e) => setFormData({ ...formData, price_pkr: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price_pkr: e.target.value })
+                    }
                     className="input-field"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Category *</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Category *
+                  </label>
                   <select
                     value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
                     className="input-field"
                   >
                     <option value="dogs">Dogs</option>
@@ -191,12 +211,16 @@ const AdminProducts = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Stock *</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Stock *
+                  </label>
                   <input
                     type="number"
                     required
                     value={formData.stock}
-                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, stock: e.target.value })
+                    }
                     className="input-field"
                   />
                 </div>
@@ -206,7 +230,9 @@ const AdminProducts = () => {
                   <input
                     type="checkbox"
                     checked={formData.is_active}
-                    onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, is_active: e.target.checked })
+                    }
                     className="mr-2"
                   />
                   Active
@@ -214,7 +240,9 @@ const AdminProducts = () => {
               </div>
               {!editingProduct && (
                 <div>
-                  <label className="block text-sm font-medium mb-2">Images *</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Images *
+                  </label>
                   <input
                     type="file"
                     multiple
@@ -227,7 +255,9 @@ const AdminProducts = () => {
               )}
               {editingProduct && (
                 <div>
-                  <label className="block text-sm font-medium mb-2">Additional Images</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Additional Images
+                  </label>
                   <input
                     type="file"
                     multiple
@@ -239,7 +269,7 @@ const AdminProducts = () => {
               )}
               <div className="flex gap-4">
                 <button type="submit" className="btn-primary">
-                  {editingProduct ? 'Update' : 'Create'}
+                  {editingProduct ? "Update" : "Create"}
                 </button>
                 <button
                   type="button"
@@ -295,10 +325,14 @@ const AdminProducts = () => {
                       <td className="p-2">{formatPrice(product.price_pkr)}</td>
                       <td className="p-2">{product.stock}</td>
                       <td className="p-2">
-                        <span className={`px-2 py-1 rounded text-sm ${
-                          product.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {product.is_active ? 'Active' : 'Inactive'}
+                        <span
+                          className={`px-2 py-1 rounded text-sm ${
+                            product.is_active
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {product.is_active ? "Active" : "Inactive"}
                         </span>
                       </td>
                       <td className="p-2">
@@ -311,7 +345,11 @@ const AdminProducts = () => {
                           </button>
                           <button
                             onClick={() => {
-                              if (confirm('Are you sure you want to delete this product?')) {
+                              if (
+                                confirm(
+                                  "Are you sure you want to delete this product?",
+                                )
+                              ) {
                                 deleteMutation.mutate(product.id);
                               }
                             }}
@@ -334,4 +372,3 @@ const AdminProducts = () => {
 };
 
 export default AdminProducts;
-

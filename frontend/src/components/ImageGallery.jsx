@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { getImageUrl } from '../utils/images';
+import { useState, useEffect, useRef } from "react";
+import { getImageUrl } from "../utils/images";
 
 const ImageGallery = ({ images, productId, selectedColor = null }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -89,7 +89,7 @@ const ImageGallery = ({ images, productId, selectedColor = null }) => {
           alt={`Product image ${currentIndex + 1}`}
           className="w-full h-full object-cover transition-opacity duration-500"
           onError={(e) => {
-            e.target.src = 'https://via.placeholder.com/800';
+            e.target.src = "https://via.placeholder.com/800";
           }}
         />
 
@@ -99,23 +99,43 @@ const ImageGallery = ({ images, productId, selectedColor = null }) => {
             <button
               onClick={prevImage}
               className={`absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg transition-all duration-300 ${
-                isHovered ? 'opacity-100' : 'opacity-0'
+                isHovered ? "opacity-100" : "opacity-0"
               }`}
               aria-label="Previous image"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </button>
             <button
               onClick={nextImage}
               className={`absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg transition-all duration-300 ${
-                isHovered ? 'opacity-100' : 'opacity-0'
+                isHovered ? "opacity-100" : "opacity-0"
               }`}
               aria-label="Next image"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
             </button>
           </>
@@ -139,8 +159,8 @@ const ImageGallery = ({ images, productId, selectedColor = null }) => {
                 onClick={() => goToImage(index)}
                 className={`flex-shrink-0 w-16 h-16 rounded overflow-hidden border-2 transition-all ${
                   currentIndex === index
-                    ? 'border-primary-600 scale-110'
-                    : 'border-transparent opacity-70 hover:opacity-100'
+                    ? "border-primary-600 scale-110"
+                    : "border-transparent opacity-70 hover:opacity-100"
                 }`}
               >
                 <img
@@ -148,7 +168,7 @@ const ImageGallery = ({ images, productId, selectedColor = null }) => {
                   alt={`Thumbnail ${index + 1}`}
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/100';
+                    e.target.src = "https://via.placeholder.com/100";
                   }}
                 />
               </button>
@@ -161,4 +181,3 @@ const ImageGallery = ({ images, productId, selectedColor = null }) => {
 };
 
 export default ImageGallery;
-

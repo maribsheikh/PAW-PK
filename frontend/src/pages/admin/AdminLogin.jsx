@@ -1,29 +1,29 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       const { user } = await login(email, password);
-      if (user.role !== 'admin') {
-        setError('Admin access required');
+      if (user.role !== "admin") {
+        setError("Admin access required");
         return;
       }
-      navigate('/admin');
+      navigate("/admin");
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed');
+      setError(err.response?.data?.error || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -34,7 +34,7 @@ const AdminLogin = () => {
       <div className="max-w-md w-full">
         <div className="card">
           <h1 className="text-3xl font-bold mb-6 text-center">Admin Login</h1>
-          
+
           {error && (
             <div className="bg-accent-50 border border-accent-200 text-accent-800 px-4 py-3 rounded mb-4">
               {error}
@@ -67,7 +67,7 @@ const AdminLogin = () => {
               disabled={loading}
               className="btn-primary w-full"
             >
-              {loading ? 'Logging in...' : 'Login'}
+              {loading ? "Logging in..." : "Login"}
             </button>
           </form>
         </div>
@@ -77,4 +77,3 @@ const AdminLogin = () => {
 };
 
 export default AdminLogin;
-

@@ -1,18 +1,15 @@
-import { useQuery } from 'react-query';
-import api from '../utils/api';
-import { formatPrice, formatDate } from '../utils/format';
-import { useAuth } from '../context/AuthContext';
+import { useQuery } from "react-query";
+import api from "../utils/api";
+import { formatPrice, formatDate } from "../utils/format";
+import { useAuth } from "../context/AuthContext";
 
 const Account = () => {
   const { user } = useAuth();
 
-  const { data: orders = [], isLoading } = useQuery(
-    'userOrders',
-    async () => {
-      const response = await api.get('/orders');
-      return response.data;
-    }
-  );
+  const { data: orders = [], isLoading } = useQuery("userOrders", async () => {
+    const response = await api.get("/orders");
+    return response.data;
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -23,8 +20,12 @@ const Account = () => {
           <div className="card">
             <h2 className="text-xl font-bold mb-4">Profile</h2>
             <div className="space-y-2">
-              <p><strong>Name:</strong> {user?.name}</p>
-              <p><strong>Email:</strong> {user?.email}</p>
+              <p>
+                <strong>Name:</strong> {user?.name}
+              </p>
+              <p>
+                <strong>Email:</strong> {user?.email}
+              </p>
             </div>
           </div>
         </div>
@@ -32,7 +33,7 @@ const Account = () => {
         <div className="md:col-span-2">
           <div className="card">
             <h2 className="text-xl font-bold mb-4">Order History</h2>
-            
+
             {isLoading ? (
               <div className="text-center py-8">Loading orders...</div>
             ) : orders.length === 0 ? (
@@ -46,11 +47,17 @@ const Account = () => {
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <p className="font-semibold">Order #{order.id}</p>
-                        <p className="text-sm text-gray-600">{formatDate(order.created_at)}</p>
+                        <p className="text-sm text-gray-600">
+                          {formatDate(order.created_at)}
+                        </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold">{formatPrice(order.total_amount)}</p>
-                        <p className="text-sm capitalize text-gray-600">{order.status}</p>
+                        <p className="font-bold">
+                          {formatPrice(order.total_amount)}
+                        </p>
+                        <p className="text-sm capitalize text-gray-600">
+                          {order.status}
+                        </p>
                       </div>
                     </div>
                     <div className="mt-2">
@@ -70,4 +77,3 @@ const Account = () => {
 };
 
 export default Account;
-

@@ -1,14 +1,14 @@
-import { useQuery } from 'react-query';
-import api from '../../utils/api';
-import { formatPrice } from '../../utils/format';
+import { useQuery } from "react-query";
+import api from "../../utils/api";
+import { formatPrice } from "../../utils/format";
 
 const AdminAnalytics = () => {
   const { data: analytics, isLoading } = useQuery(
-    'adminAnalytics',
+    "adminAnalytics",
     async () => {
-      const response = await api.get('/admin/analytics');
+      const response = await api.get("/admin/analytics");
       return response.data;
-    }
+    },
   );
 
   if (isLoading) {
@@ -34,25 +34,35 @@ const AdminAnalytics = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="card">
             <h3 className="text-sm text-gray-600 mb-2">Total Orders</h3>
-            <p className="text-3xl font-bold">{analytics?.stats?.totalOrders || 0}</p>
+            <p className="text-3xl font-bold">
+              {analytics?.stats?.totalOrders || 0}
+            </p>
           </div>
           <div className="card">
             <h3 className="text-sm text-gray-600 mb-2">Total Revenue</h3>
-            <p className="text-3xl font-bold">{formatPrice(analytics?.stats?.totalRevenue || 0)}</p>
+            <p className="text-3xl font-bold">
+              {formatPrice(analytics?.stats?.totalRevenue || 0)}
+            </p>
           </div>
           <div className="card">
             <h3 className="text-sm text-gray-600 mb-2">Total Products</h3>
-            <p className="text-3xl font-bold">{analytics?.stats?.totalProducts || 0}</p>
+            <p className="text-3xl font-bold">
+              {analytics?.stats?.totalProducts || 0}
+            </p>
           </div>
           <div className="card">
             <h3 className="text-sm text-gray-600 mb-2">Pending Reviews</h3>
-            <p className="text-3xl font-bold">{analytics?.stats?.pendingReviews || 0}</p>
+            <p className="text-3xl font-bold">
+              {analytics?.stats?.pendingReviews || 0}
+            </p>
           </div>
         </div>
 
         {/* Sales by Day */}
         <div className="card mb-8">
-          <h2 className="text-xl font-bold mb-4">Sales by Day (Last 30 Days)</h2>
+          <h2 className="text-xl font-bold mb-4">
+            Sales by Day (Last 30 Days)
+          </h2>
           {analytics?.salesByDay && analytics.salesByDay.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -66,9 +76,13 @@ const AdminAnalytics = () => {
                 <tbody>
                   {analytics.salesByDay.map((day, index) => (
                     <tr key={index} className="border-b">
-                      <td className="p-2">{new Date(day.date).toLocaleDateString()}</td>
+                      <td className="p-2">
+                        {new Date(day.date).toLocaleDateString()}
+                      </td>
                       <td className="p-2">{day.order_count}</td>
-                      <td className="p-2">{formatPrice(parseFloat(day.total_sales || 0))}</td>
+                      <td className="p-2">
+                        {formatPrice(parseFloat(day.total_sales || 0))}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -99,7 +113,9 @@ const AdminAnalytics = () => {
                       <td className="p-2">{product.title}</td>
                       <td className="p-2">{product.sku}</td>
                       <td className="p-2">{product.total_sold}</td>
-                      <td className="p-2">{formatPrice(parseFloat(product.total_revenue || 0))}</td>
+                      <td className="p-2">
+                        {formatPrice(parseFloat(product.total_revenue || 0))}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -115,4 +131,3 @@ const AdminAnalytics = () => {
 };
 
 export default AdminAnalytics;
-

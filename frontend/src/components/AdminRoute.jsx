@@ -1,5 +1,5 @@
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const AdminRoute = ({ children }) => {
   const { user, loading, isAdmin } = useAuth();
@@ -20,4 +20,3 @@ const AdminRoute = ({ children }) => {
 };
 
 export default AdminRoute;
-
