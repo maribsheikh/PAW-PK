@@ -51,6 +51,7 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization", "x-session-id"],
   })
 );
+app.options("*", cors());
 
 
 app.use(
