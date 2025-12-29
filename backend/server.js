@@ -25,54 +25,33 @@ const PORT = process.env.BACKEND_PORT || process.env.PORT || 3001;
 
 // Middleware - CORS first, then helmet
 // Allow multiple origins for development and production
-const normalizeOrigin = (value) => {
-  if (!value) return null;
-  try {
-    if (value.startsWith("http://") || value.startsWith("https://")) {
-      return new URL(value).origin;
-    }
-  } catch {
-    return value.replace(/\/$/, "");
-  }
-  return value.replace(/\/$/, "");
-};
-
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
+const allowedOrigins = new Set([
   "https://thepawinternational.com",
   "https://www.thepawinternational.com",
   "https://api.thepawinternational.com",
-  "http://localhost:5173", // Keep for local development
+  "http://localhost:5173",
   "http://localhost:3000",
-].map(normalizeOrigin).filter(Boolean); // Remove undefined values
-
-const allowedOriginPatterns = [
-  /^https?:\/\/(.+\.)?thepawinternational\.com(:\d+)?$/,
-  /^http:\/\/localhost(:\d+)?$/,
-  /^http:\/\/127\.0\.0\.1(:\d+)?$/,
-];
-
-const isAllowedOrigin = (origin) => {
-  if (!origin) return true;
-  if (allowedOrigins.includes(origin)) return true;
-  return allowedOriginPatterns.some((pattern) => pattern.test(origin));
-};
+]);
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (isAllowedOrigin(origin)) return callback(null, true);
+    origin: (origin, callback) => {
+      // Allow server-to-server, curl, health checks
+      if (!origin) return callback(null, true);
 
-      // Log for debugging
-      console.log("CORS blocked origin:", origin);
-      return callback(new Error("Not allowed by CORS"));
+      if (allowedOrigins.has(origin)) {
+        return callback(null, true);
+      }
+
+      console.error("❌ Blocked by CORS:", origin);
+      return callback(new Error("CORS not allowed"), false);
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "x-session-id"],
-  }),
+  })
 );
+
 
 app.use(
   helmet({
