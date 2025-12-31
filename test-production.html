@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Frontend-Backend Connection Test</title>
+    <title>Production Frontend-Backend Connection Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -35,6 +35,12 @@
             color: #0c5460;
         }
 
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
         pre {
             background: #f4f4f4;
             padding: 10px;
@@ -49,16 +55,45 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin: 5px;
         }
 
         button:hover {
             background: #0056b3;
         }
+
+        .env-toggle {
+            margin: 10px 0;
+        }
+
+        .env-toggle label {
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
+        .env-toggle input[type="radio"] {
+            margin-right: 5px;
+        }
     </style>
 </head>
 
 <body>
-    <h1>Frontend-Backend Connection Test</h1>
+    <h1>🚀 Production Frontend-Backend Connection Test</h1>
+
+    <div class="test warning">
+        <h3>Environment Selection</h3>
+        <div class="env-toggle">
+            <label>
+                <input type="radio" name="env" value="production" checked onchange="switchEnvironment()">
+                Production (thepawinternational.com)
+            </label>
+            <label>
+                <input type="radio" name="env" value="local" onchange="switchEnvironment()">
+                Local (localhost:3001)
+            </label>
+        </div>
+        <div id="current-env"></div>
+    </div>
 
     <div class="test info">
         <h3>Test 1: API Health Check</h3>
@@ -79,30 +114,54 @@
     </div>
 
     <div class="test info">
-        <h3>Test 4: Frontend API URL</h3>
-        <div id="frontend-api-url"></div>
+        <h3>Test 4: Full System Check</h3>
+        <button onclick="runAllTests()">Run All Tests</button>
+        <div id="all-tests-result"></div>
     </div>
 
     <script>
-        const API_URL = 'http://localhost:3001/api';
+        let API_URL = 'https://api.thepawinternational.com/api';
 
-        // Display frontend API URL
-        document.getElementById('frontend-api-url').innerHTML =
-            `<p><strong>Frontend is configured to use:</strong></p>
-             <pre>${API_URL}</pre>`;
+        function switchEnvironment() {
+            const env = document.querySelector('input[name="env"]:checked').value;
+            if (env === 'production') {
+                API_URL = 'https://api.thepawinternational.com/api';
+            } else {
+                API_URL = 'http://localhost:3001/api';
+            }
+            updateCurrentEnv();
+            clearResults();
+        }
+
+        function updateCurrentEnv() {
+            document.getElementById('current-env').innerHTML =
+                `<p><strong>Current API URL:</strong></p>
+                 <pre>${API_URL}</pre>
+                 <p><strong>Your Origin:</strong> ${window.location.origin}</p>`;
+        }
+
+        function clearResults() {
+            document.getElementById('health-result').innerHTML = '';
+            document.getElementById('products-result').innerHTML = '';
+            document.getElementById('cors-result').innerHTML = '';
+            document.getElementById('all-tests-result').innerHTML = '';
+        }
 
         async function testHealth() {
             const resultDiv = document.getElementById('health-result');
             resultDiv.innerHTML = '<p>Testing...</p>';
 
             try {
+                const startTime = Date.now();
                 const response = await fetch(`${API_URL}/health`);
+                const endTime = Date.now();
                 const data = await response.json();
 
                 if (response.ok) {
                     resultDiv.innerHTML = `
                         <div class="success">
                             <p>✅ Health check passed!</p>
+                            <p><strong>Response Time:</strong> ${endTime - startTime}ms</p>
                             <pre>${JSON.stringify(data, null, 2)}</pre>
                         </div>
                     `;
@@ -118,7 +177,14 @@
                 resultDiv.innerHTML = `
                     <div class="error">
                         <p>❌ Error: ${error.message}</p>
-                        <p>This could be a CORS issue or network problem.</p>
+                        <p>This could be a CORS issue, network problem, or the backend is not running.</p>
+                        <p><strong>Troubleshooting:</strong></p>
+                        <ul>
+                            <li>Check if backend server is running</li>
+                            <li>Verify API URL is correct: ${API_URL}</li>
+                            <li>Check browser console (F12) for detailed error</li>
+                            <li>Verify CORS is configured for origin: ${window.location.origin}</li>
+                        </ul>
                     </div>
                 `;
             }
@@ -129,7 +195,9 @@
             resultDiv.innerHTML = '<p>Testing...</p>';
 
             try {
+                const startTime = Date.now();
                 const response = await fetch(`${API_URL}/products`);
+                const endTime = Date.now();
                 const data = await response.json();
 
                 if (response.ok) {
@@ -137,6 +205,7 @@
                     resultDiv.innerHTML = `
                         <div class="success">
                             <p>✅ Products API working!</p>
+                            <p><strong>Response Time:</strong> ${endTime - startTime}ms</p>
                             <p><strong>Found ${productCount} products</strong></p>
                             <pre>${JSON.stringify(data.slice(0, 2), null, 2)}${productCount > 2 ? '\n... (showing first 2)' : ''}</pre>
                         </div>
@@ -165,17 +234,17 @@
 
             try {
                 const response = await fetch(`${API_URL}/health`, {
-                    method: 'OPTIONS',
+                    method: 'GET',
                     headers: {
-                        'Origin': window.location.origin,
-                        'Access-Control-Request-Method': 'GET'
+                        'Content-Type': 'application/json'
                     }
                 });
 
                 const corsHeaders = {
                     'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
                     'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
-                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+                    'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials')
                 };
 
                 if (corsHeaders['Access-Control-Allow-Origin']) {
@@ -183,7 +252,8 @@
                         <div class="success">
                             <p>✅ CORS is configured!</p>
                             <pre>${JSON.stringify(corsHeaders, null, 2)}</pre>
-                            <p>Your frontend origin: <strong>${window.location.origin}</strong></p>
+                            <p><strong>Your frontend origin:</strong> ${window.location.origin}</p>
+                            <p><strong>Allowed origin:</strong> ${corsHeaders['Access-Control-Allow-Origin']}</p>
                         </div>
                     `;
                 } else {
@@ -198,17 +268,70 @@
                 resultDiv.innerHTML = `
                     <div class="error">
                         <p>❌ CORS test failed: ${error.message}</p>
+                        <p>This usually means CORS is blocking the request.</p>
                     </div>
                 `;
             }
         }
 
-        // Auto-run tests on load
+        async function runAllTests() {
+            const resultDiv = document.getElementById('all-tests-result');
+            resultDiv.innerHTML = '<p>Running all tests...</p>';
+
+            const results = {
+                health: false,
+                products: false,
+                cors: false
+            };
+
+            // Test Health
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                results.health = response.ok;
+            } catch (e) {
+                results.health = false;
+            }
+
+            // Test Products
+            try {
+                const response = await fetch(`${API_URL}/products`);
+                results.products = response.ok;
+            } catch (e) {
+                results.products = false;
+            }
+
+            // Test CORS
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                results.cors = response.headers.get('Access-Control-Allow-Origin') !== null;
+            } catch (e) {
+                results.cors = false;
+            }
+
+            const allPassed = results.health && results.products && results.cors;
+            const passedCount = Object.values(results).filter(v => v).length;
+
+            resultDiv.innerHTML = `
+                <div class="${allPassed ? 'success' : 'error'}">
+                    <h4>${allPassed ? '✅ All Tests Passed!' : '⚠️ Some Tests Failed'}</h4>
+                    <p><strong>Results:</strong> ${passedCount}/3 tests passed</p>
+                    <ul>
+                        <li>${results.health ? '✅' : '❌'} Health Check</li>
+                        <li>${results.products ? '✅' : '❌'} Products API</li>
+                        <li>${results.cors ? '✅' : '❌'} CORS Configuration</li>
+                    </ul>
+                    ${!allPassed ? '<p><strong>Run individual tests above for detailed error messages.</strong></p>' : ''}
+                </div>
+            `;
+        }
+
+        // Initialize
         window.addEventListener('load', () => {
+            updateCurrentEnv();
+
+            // Auto-run tests after a short delay
             setTimeout(() => {
-                testHealth();
-                setTimeout(() => testProducts(), 500);
-                setTimeout(() => testCORS(), 1000);
+                runAllTests();
             }, 500);
         });
     </script>

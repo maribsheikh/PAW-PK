@@ -1,15 +1,40 @@
 version: '3.8'
+
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pawpk-app
     ports:
       - "80:3001"
     environment:
       - NODE_ENV=production
       - BACKEND_PORT=3001
-    restart: always
+      - PORT=3001
+      - FRONTEND_URL=https://thepawinternational.com
+    env_file:
+      - ./backend/.env
+    volumes:
+      # Persist uploads and database
+      - ./backend/uploads:/app/backend/uploads
+      - ./backend/pawpk_production.sqlite3:/app/backend/pawpk_production.sqlite3
+      - ./backend/logs:/app/backend/logs
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:3001/api/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - pawpk-network
+
+networks:
+  pawpk-network:
+    driver: bridge
