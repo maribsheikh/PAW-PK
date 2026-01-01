@@ -1,228 +1,345 @@
-# PAW-PK Deployment Guide
+# PAW-PK VPS Deployment Guide
 
 ## Architecture Overview
 
-- **Frontend**: Deployed on Hostinger at `https://thepawinternational.com`
-- **Backend API**: Deployed on VPS at `https://api.thepawinternational.com`
+Single VPS deployment where Node.js serves both the API and frontend static files.
 
-## Prerequisites
-
-### VPS Requirements
-- Node.js 18+ installed
-- Nginx installed
-- Certbot for SSL certificates
-- PM2 or Docker for process management
-
-### DNS Configuration
-Ensure these DNS records are configured:
-- `thepawinternational.com` → Hostinger IP
-- `www.thepawinternational.com` → Hostinger IP  
-- `api.thepawinternational.com` → Your VPS IP
+```
+┌─────────────────────────────────────────┐
+│                  VPS                     │
+│  ┌─────────┐      ┌──────────────────┐  │
+│  │  Nginx  │ ──── │  Node.js (PM2)   │  │
+│  │  :80    │      │  :3001           │  │
+│  │  :443   │      │  - API routes    │  │
+│  └─────────┘      │  - Static files  │  │
+│                   └──────────────────┘  │
+└─────────────────────────────────────────┘
+```
 
 ---
 
-## Backend Deployment (VPS)
+## Prerequisites
 
-### 1. Clone and Setup
+- VPS with Ubuntu 20.04+ (DigitalOcean, Linode, Hostinger VPS, etc.)
+- Domain pointing to your VPS IP
+- SSH access to the VPS
+
+---
+
+## Step 1: VPS Initial Setup
 
 ```bash
 # SSH to your VPS
 ssh root@your-vps-ip
 
-# Clone repository
-cd /opt
-git clone git@github.com:maribsheikh/PAW-PK.git
-cd PAW-PK/backend
+# Update system
+apt update && apt upgrade -y
 
-# Install dependencies
-npm install --production
+# Install Node.js 18
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+apt install -y nodejs
 
-# Create environment file
-cp .env.production .env
-
-# Edit .env and set a strong JWT_SECRET
-nano .env
-```
-
-### 2. Configure Nginx
-
-```bash
-# Copy nginx config
-sudo cp /opt/PAW-PK/nginx-config/api.thepawinternational.com.conf /etc/nginx/sites-available/
-
-# Enable the site
-sudo ln -sf /etc/nginx/sites-available/api.thepawinternational.com.conf /etc/nginx/sites-enabled/
-
-# Test nginx config
-sudo nginx -t
-
-# Get SSL certificate
-sudo certbot certonly --nginx -d api.thepawinternational.com
-
-# Reload nginx
-sudo systemctl reload nginx
-```
-
-### 3. Run Backend with PM2
-
-```bash
 # Install PM2 globally
 npm install -g pm2
 
-# Start the backend
-cd /opt/PAW-PK/backend
-pm2 start server.js --name pawpk-backend
+# Install Nginx and Certbot
+apt install -y nginx certbot python3-certbot-nginx
 
-# Save PM2 config for auto-restart
-pm2 save
-pm2 startup
-```
-
-### 4. Verify Backend
-
-```bash
-# Test locally
-curl http://localhost:3001/api/health
-
-# Test via nginx
-curl https://api.thepawinternational.com/api/health
-
-# Test CORS
-curl -I -X OPTIONS https://api.thepawinternational.com/api/products \
-  -H "Origin: https://thepawinternational.com" \
-  -H "Access-Control-Request-Method: GET"
+# Verify installations
+node --version
+npm --version
+pm2 --version
+nginx -v
 ```
 
 ---
 
-## Frontend Deployment (Hostinger)
-
-### 1. Build for Production
+## Step 2: Clone and Setup Project
 
 ```bash
-# On your local machine
-cd PAW-PK/frontend
+# Create project directory
+cd /opt
+git clone https://github.com/yourusername/PAW-PK.git
+cd PAW-PK
 
-# Ensure production env is set
-cat .env.production
-# Should contain: VITE_API_URL=https://api.thepawinternational.com/api
+# Install backend dependencies
+cd backend
+npm install --production
 
-# Build
+# Install frontend dependencies and build
+cd ../frontend
+npm install
 npm run build
 
-# The dist/ folder contains your production build
+cd ..
 ```
 
-### 2. Upload to Hostinger
+---
 
-Option A: **FTP Upload**
-- Connect via FTP to Hostinger
-- Upload contents of `frontend/dist/` to `public_html/`
+## Step 3: Configure Environment
 
-Option B: **Hostinger File Manager**
-- Zip the `dist/` folder
-- Upload to Hostinger via File Manager
-- Extract to `public_html/`
+### Backend Environment
 
-Option C: **Git Deployment**
-- Setup Git deployment on Hostinger
-- Push and let it build automatically
+```bash
+cd /opt/PAW-PK/backend
+cp .env.example .env
+nano .env
+```
 
-### 3. Configure Hostinger .htaccess
+Update with your values:
+```env
+NODE_ENV=production
+PORT=3001
+BACKEND_PORT=3001
 
-Create `public_html/.htaccess` for SPA routing:
+# Your domain (used for CORS - same origin so can be localhost)
+FRONTEND_URL=https://yourdomain.com
 
-```apache
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
-  
-  # Handle SPA routing - serve index.html for all routes
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule ^ index.html [QSA,L]
-</IfModule>
+# Generate with: openssl rand -base64 32
+JWT_SECRET=your-generated-secret-here
+JWT_EXPIRES_IN=7d
 
-# Enable CORS for assets (optional)
-<IfModule mod_headers.c>
-  <FilesMatch "\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$">
-    Header set Access-Control-Allow-Origin "*"
-  </FilesMatch>
-</IfModule>
+# Database
+DB_FILE=./pawpk_prod.sqlite3
 
-# Caching
-<IfModule mod_expires.c>
-  ExpiresActive On
-  ExpiresByType text/css "access plus 1 year"
-  ExpiresByType application/javascript "access plus 1 year"
-  ExpiresByType image/png "access plus 1 year"
-  ExpiresByType image/jpeg "access plus 1 year"
-  ExpiresByType image/gif "access plus 1 year"
-  ExpiresByType image/svg+xml "access plus 1 year"
-</IfModule>
+# Admin credentials for initial setup
+ADMIN_EMAIL=admin@yourdomain.com
+ADMIN_PASSWORD=your-secure-admin-password
+```
+
+### Frontend Environment
+
+```bash
+cd /opt/PAW-PK/frontend
+cp .env.example .env.production
+nano .env.production
+```
+
+Update the API URL (use relative path since same server):
+```env
+VITE_API_URL=/api
+```
+
+Rebuild frontend with correct config:
+```bash
+npm run build
+```
+
+---
+
+## Step 4: Initialize Database
+
+```bash
+cd /opt/PAW-PK/backend
+npm run migrate
+npm run seed
+```
+
+---
+
+## Step 5: Start Backend with PM2
+
+```bash
+cd /opt/PAW-PK/backend
+pm2 start server.js --name pawpk
+
+# Save PM2 config for auto-restart on reboot
+pm2 save
+pm2 startup
+```
+
+Verify it's running:
+```bash
+pm2 status
+curl http://localhost:3001/api/health
+```
+
+---
+
+## Step 6: Configure Nginx
+
+Create nginx config:
+```bash
+nano /etc/nginx/sites-available/yourdomain.com
+```
+
+Add this configuration:
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com www.yourdomain.com;
+
+    # Redirect to HTTPS (after SSL is set up)
+    location / {
+        return 301 https://$server_name$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    server_name yourdomain.com www.yourdomain.com;
+
+    # SSL certificates (will be added by Certbot)
+    # ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+
+    # Security headers
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+
+    # Gzip compression
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
+
+    # Proxy all requests to Node.js
+    location / {
+        proxy_pass http://localhost:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Cache static assets
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$ {
+        proxy_pass http://localhost:3001;
+        proxy_set_header Host $host;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
+```
+
+Enable the site:
+```bash
+ln -sf /etc/nginx/sites-available/yourdomain.com /etc/nginx/sites-enabled/
+rm -f /etc/nginx/sites-enabled/default
+
+# Test config
+nginx -t
+
+# Reload nginx
+systemctl reload nginx
+```
+
+---
+
+## Step 7: Setup SSL with Let's Encrypt
+
+```bash
+certbot --nginx -d yourdomain.com -d www.yourdomain.com
+```
+
+Follow the prompts. Certbot will automatically update your nginx config with SSL certificates.
+
+Test auto-renewal:
+```bash
+certbot renew --dry-run
+```
+
+---
+
+## Step 8: Verify Deployment
+
+```bash
+# Check services are running
+pm2 status
+systemctl status nginx
+
+# Test endpoints
+curl https://yourdomain.com/api/health
+curl https://yourdomain.com
+```
+
+Visit `https://yourdomain.com` in your browser!
+
+---
+
+## Updating the Application
+
+```bash
+cd /opt/PAW-PK
+
+# Pull latest code
+git pull origin main
+
+# Update backend
+cd backend
+npm install --production
+npm run migrate
+
+# Rebuild frontend
+cd ../frontend
+npm install
+npm run build
+
+# Restart backend
+pm2 restart pawpk
 ```
 
 ---
 
 ## Troubleshooting
 
-### Issue: Frontend can't reach Backend API
+### Check Logs
 
-**Symptoms**: 
-- Direct API calls work: `curl https://api.thepawinternational.com/api/products`
-- Browser console shows CORS errors
-
-**Solutions**:
-
-1. **Check CORS headers on VPS**:
 ```bash
-curl -I -X OPTIONS https://api.thepawinternational.com/api/products \
-  -H "Origin: https://thepawinternational.com" \
-  -H "Access-Control-Request-Method: GET"
-```
-Should return:
-```
-Access-Control-Allow-Origin: https://thepawinternational.com
-Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS
-Access-Control-Allow-Credentials: true
+# PM2 logs
+pm2 logs pawpk --lines 100
+
+# Nginx logs
+tail -f /var/log/nginx/error.log
+tail -f /var/log/nginx/access.log
 ```
 
-2. **Verify nginx CORS config**:
-```bash
-sudo nginx -t
-sudo cat /etc/nginx/sites-enabled/api.thepawinternational.com.conf | grep -A5 "Access-Control"
-```
+### Common Issues
 
-3. **Check backend logs**:
-```bash
-pm2 logs pawpk-backend
-# Look for "CORS blocked origin:" messages
-```
-
-4. **Verify SSL certificates**:
-```bash
-curl -v https://api.thepawinternational.com/api/health 2>&1 | grep -i ssl
-```
-
-### Issue: Mixed Content Errors
-
-If frontend is HTTPS but calling HTTP API:
-- Ensure `VITE_API_URL` uses `https://`
-- Rebuild frontend and redeploy
-
-### Issue: 502 Bad Gateway
-
-Backend not running:
+**502 Bad Gateway:**
 ```bash
 pm2 status
-pm2 restart pawpk-backend
+pm2 restart pawpk
 ```
 
-### Issue: Images not loading
+**Permission errors:**
+```bash
+chown -R www-data:www-data /opt/PAW-PK
+```
 
-1. Check image paths in database
-2. Verify `/uploads/` and `/images/` directories exist on VPS
-3. Check nginx alias paths match actual file locations
+**Port already in use:**
+```bash
+lsof -i :3001
+kill -9 <PID>
+pm2 restart pawpk
+```
+
+---
+
+## Quick Commands Reference
+
+```bash
+# Restart app
+pm2 restart pawpk
+
+# View logs
+pm2 logs pawpk
+
+# Reload nginx
+systemctl reload nginx
+
+# Renew SSL
+certbot renew
+
+# Check disk space
+df -h
+
+# Check memory
+free -m
+```
 
 ---
 
@@ -234,34 +351,14 @@ pm2 restart pawpk-backend
 |----------|-------------|---------|
 | `NODE_ENV` | Environment mode | `production` |
 | `PORT` | Server port | `3001` |
-| `FRONTEND_URL` | Frontend origin for CORS | `https://thepawinternational.com` |
-| `JWT_SECRET` | Secret for JWT tokens | `random-strong-secret` |
+| `FRONTEND_URL` | For CORS (your domain) | `https://yourdomain.com` |
+| `JWT_SECRET` | Secret for JWT tokens | `openssl rand -base64 32` |
 | `JWT_EXPIRES_IN` | Token expiration | `7d` |
+| `ADMIN_EMAIL` | Initial admin email | `admin@yourdomain.com` |
+| `ADMIN_PASSWORD` | Initial admin password | `secure-password` |
 
 ### Frontend (.env.production)
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `VITE_API_URL` | Backend API URL | `https://api.thepawinternational.com/api` |
-
----
-
-## Quick Commands
-
-```bash
-# VPS - Restart backend
-pm2 restart pawpk-backend
-
-# VPS - View logs
-pm2 logs pawpk-backend --lines 100
-
-# VPS - Reload nginx
-sudo systemctl reload nginx
-
-# Local - Build frontend
-cd frontend && npm run build
-
-# Local - Test production build locally
-cd frontend && npm run preview
-```
-
+| `VITE_API_URL` | API URL (relative for same server) | `/api` |

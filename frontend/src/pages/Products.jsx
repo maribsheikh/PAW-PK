@@ -42,21 +42,6 @@ const Products = () => {
     }
   );
 
-  // Log for debugging
-  useEffect(() => {
-    if (error) {
-      console.error('Products API Error:', error);
-      console.error('Error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        url: error.config?.url
-      });
-    }
-    if (products) {
-      console.log('Products loaded:', products.length);
-    }
-  }, [products, error]);
 
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value };
